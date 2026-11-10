@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ-панель конструктора визиток</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+    <style>
+        body { font-family: -apple-system, sans-serif; background: #f1f5f9; padding: 20px; color: #0f172a; }
+        .admin-card { max-width: 620px; margin: 0 auto; background: #fff; padding: 28px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        h2 { margin-bottom: 16px; color: #0f766e; }
+        h3 { margin-top: 24px; margin-bottom: 12px; color: #334155; font-size: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-group { margin-bottom: 14px; text-align: left; }
+        .btn-config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 10px; }
+        label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: #475569; }
+        input, textarea, select { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 10px; box-sizing: border-box; font-size: 14px; }
+        input[type="color"] { height: 40px; padding: 2px; cursor: pointer; }
+        button { width: 100%; padding: 14px; background: #0f766e; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 15px; transition: background 0.2s; }
+        button:hover { background: #115e59; }
+        #admin-panel { display: none; }
+        .qr-box { margin-top: 24px; text-align: center; background: #f8fafc; padding: 20px; border-radius: 14px; border: 1px solid #e2e8f0; }
+        .qr-box img { margin-top: 12px; }
+    </style>
+</head>
+<body>
+
+<div class="admin-card">
+    <div id="login-block">
+        <h2>Вход в админ-панель</h2>
+        <div class="form-group">
+            <label>Пароль доступа:</label>
+            <input type="password" id="pass-input" placeholder="Введите пароль">
+        </div>
+        <button onclick="login()">Войти</button>
+    </div>
+
+    <div id="admin-panel">
+        <h2>Управление визиткой</h2>
+        
+        <h3>Основная информация</h3>
+        <div class="form-group">
+            <label>ФИО Врача:</label>
+            <input type="text" id="name" value="Нургалиев Роман Николаевич">
+        </div>
+        <div class="form-group">
+            <label>Специализация:</label>
+            <input type="text" id="specialty" value="Стоматолог-ортопед">
+        </div>
+        <div class="form-group">
+            <label>Информация / Биография:</label>
+            <textarea id="bio" rows="3">Эстетическая реставрация, протезирование и имплантация любой сложности. Индивидуальный подход к каждому пациенту.</textarea>
+        </div>
+        <div class="form-group">
+            <label>Фотография врача:</label>
+            <input type="file" id="photo-file" accept="image/*" onchange="convertImage(this, 'photo')">
+        </div>
+
+        <h3>Клиника и адрес</h3>
+        <div class="form-group">
+            <label>Название клиники:</label>
+            <input type="text" id="clinic" value="ORAL DESIGN CLINIC">
+        </div>
+        <div class="form-group">
+            <label>Адрес клиники:</label>
+            <input type="text" id="address" value="📍 г. Астана, Тұран даңғылы, 55/13">
+        </div>
+
+        <h3>Контакты и ссылки</h3>
+        <div class="form-group">
+            <label>Номер WhatsApp и телефона (без +):</label>
+            <input type="text" id="whatsapp" value="77015504050">
+        </div>
+        <div class="form-group">
+            <label>Instagram Username (без @):</label>
+            <input type="text" id="instagram" value="doctor_profile">
+        </div>
+        <div class="form-group">
+            <label>Email почта:</label>
+            <input type="email" id="email" value="doctor@clinic.kz">
+        </div>
+
+        <h3>Настройка кнопок (Цвета и Значки)</h3>
+
+        <label>1. Кнопка «Сохранить контакт»</label>
+        <div class="btn-config-grid">
+            <div><label>Цвет / Градиент (HEX):</label><input type="color" id="btnVcfBg" value="#0f766e"></div>
+            <div><label>Иконка (файл):</label><input type="file" accept="image/*" onchange="convertImage(this, 'iconVcf')"></div>
+        </div>
+
+        <label>2. Кнопка «Позвонить врачу»</label>
+        <div class="btn-config-grid">
+            <div><label>Цвет / Градиент (HEX):</label><input type="color" id="btnPhoneBg" value="#0284c7"></div>
+            <div><label>Иконка (файл):</label><input type="file" accept="image/*" onchange="convertImage(this, 'iconPhone')"></div>
+        </div>
+
+        <label>3. Кнопка «WhatsApp»</label>
+        <div class="btn-config-grid">
+            <div><label>Цвет / Градиент (HEX):</label><input type="color" id="btnWaBg" value="#10b981"></div>
+            <div><label>Иконка (файл):</label><input type="file" accept="image/*" onchange="convertImage(this, 'iconWa')"></div>
+        </div>
+
+        <label>4. Кнопка «Instagram»</label>
+        <div class="btn-config-grid">
+            <div><label>Цвет / Градиент (HEX):</label><input type="color" id="btnInstaBg" value="#e1306c"></div>
+            <div><label>Иконка (файл):</label><input type="file" accept="image/*" onchange="convertImage(this, 'iconInsta')"></div>
+        </div>
+
+        <label>5. Кнопка «Написать на почту»</label>
+        <div class="btn-config-grid">
+            <div><label>Цвет / Градиент (HEX):</label><input type="color" id="btnMailBg" value="#64748b"></div>
+            <div><label>Иконка (файл):</label><input type="file" accept="image/*" onchange="convertImage(this, 'iconMail')"></div>
+        </div>
+
+        <h3>Аналитика и трекеры</h3>
+        <div class="form-group">
+            <label>Google Analytics ID:</label>
+            <input type="text" id="gaId" placeholder="G-ABC123XYZ">
+        </div>
+        <div class="form-group">
+            <label>Google Tag Manager ID:</label>
+            <input type="text" id="gtmId" placeholder="GTM-XXXXXXX">
+        </div>
+        <div class="form-group">
+            <label>Яндекс Метрика Счетчика ID:</label>
+            <input type="text" id="ymId" placeholder="12345678">
+        </div>
+        <div class="form-group">
+            <label>Google Search Console (content мета-тега):</label>
+            <input type="text" id="gscTag" placeholder="строка верификации">
+        </div>
+
+        <button onclick="saveAndDownload()">💾 Сохранить и применить</button>
+
+        <div class="qr-box">
+            <label><strong>QR-код для этой визитки:</strong></label>
+            <input type="text" id="siteUrl" placeholder="Введите ссылку на визитку" style="margin-top:6px; margin-bottom:10px;">
+            <button onclick="generateQR()" style="background: #10b981; margin-top:0;">Сгенерировать QR-код</button>
+            <div id="qrcode-container"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const imagesData = { photo: "", iconVcf: "", iconPhone: "", iconWa: "", iconInsta: "", iconMail: "" };
+
+    function login() {
+        const pass = document.getElementById('pass-input').value;
+        if (pass === "admin123") {
+            document.getElementById('login-block').style.display = 'none';
+            document.getElementById('admin-panel').style.display = 'block';
+            loadExistingData();
+        } else {
+            alert('Неверный пароль!');
+        }
+    }
+
+    function loadExistingData() {
+        const saved = localStorage.getItem('vcard_data');
+        if (saved) {
+            const data = JSON.parse(saved);
+            document.getElementById('name').value = data.name || '';
+            document.getElementById('specialty').value = data.specialty || '';
+            document.getElementById('bio').value = data.bio || '';
+            document.getElementById('clinic').value = data.clinic || '';
+            document.getElementById('address').value = data.address || '';
+            document.getElementById('whatsapp').value = data.whatsapp || '';
+            document.getElementById('instagram').value = data.instagram || '';
+            document.getElementById('email').value = data.email || '';
+
+            imagesData.photo = data.photo || '';
+            imagesData.iconVcf = data.iconVcf || '';
+            imagesData.iconPhone = data.iconPhone || '';
+            imagesData.iconWa = data.iconWa || '';
+            imagesData.iconInsta = data.iconInsta || '';
+            imagesData.iconMail = data.iconMail || '';
+
+            document.getElementById('gaId').value = data.gaId || '';
+            document.getElementById('gtmId').value = data.gtmId || '';
+            document.getElementById('ymId').value = data.ymId || '';
+            document.getElementById('gscTag').value = data.gscTag || '';
+        }
+        document.getElementById('siteUrl').value = window.location.origin + "/index.html";
+    }
+
+    function convertImage(inputEl, key) {
+        const file = inputEl.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = function() { imagesData[key] = reader.result; }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function saveAndDownload() {
+        const config = {
+            name: document.getElementById('name').value,
+            specialty: document.getElementById('specialty').value,
+            bio: document.getElementById('bio').value,
+            clinic: document.getElementById('clinic').value,
+            address: document.getElementById('address').value,
+            whatsapp: document.getElementById('whatsapp').value,
+            instagram: document.getElementById('instagram').value,
+            email: document.getElementById('email').value,
+
+            primaryColor: "#0f766e",
+            btnVcfBg: document.getElementById('btnVcfBg').value,
+            btnPhoneBg: document.getElementById('btnPhoneBg').value,
+            btnWaBg: document.getElementById('btnWaBg').value,
+            btnInstaBg: document.getElementById('btnInstaBg').value,
+            btnMailBg: document.getElementById('btnMailBg').value,
+
+            photo: imagesData.photo || "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=400&q=80",
+            iconVcf: imagesData.iconVcf,
+            iconPhone: imagesData.iconPhone,
+            iconWa: imagesData.iconWa,
+            iconInsta: imagesData.iconInsta,
+            iconMail: imagesData.iconMail,
+
+            gaId: document.getElementById('gaId').value,
+            gtmId: document.getElementById('gtmId').value,
+            ymId: document.getElementById('ymId').value,
+            gscTag: document.getElementById('gscTag').value
+        };
+
+        localStorage.setItem('vcard_data', JSON.stringify(config));
+
+        const blob = new Blob([JSON.stringify(config, null, 2)], { type: "application/json" });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'data.json';
+        a.click();
+
+        alert('Настройки сохранены! Обновлены стили, адрес и файл data.json.');
+    }
+
+    function generateQR() {
+        const url = document.getElementById('siteUrl').value;
+        const container = document.getElementById('qrcode-container');
+        container.innerHTML = "";
+        if (!url) return alert('Введите ссылку для генерации QR-кода');
+        try {
+            const qr = qrcode(0, 'M');
+            qr.addData(url);
+            qr.make();
+            container.innerHTML = qr.createImgTag(5);
+        } catch (e) {
+            alert('Ошибка генерации QR: ' + e.message);
+        }
+    }
+</script>
+</body>
+</html>
